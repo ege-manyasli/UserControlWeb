@@ -1,0 +1,297 @@
+﻿@model Users
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+@{
+    ViewData["Title"] = "Create User";
+}
+
+<!-- start page title -->
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box d-flex align-items-center justify-content-between">
+            <h4 class="mb-0">Kullanıcı Listesi</h4>
+
+            <div class="page-title-right">
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a href="javascript: void(0);">Anasayfa</a></li>
+                    <li class="breadcrumb-item active">Kullanıcı Listesi</li>
+
+                    
+                </ol>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- end page title -->
+
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="position-relative">
+                    <div class="modal-button mt-2">
+                        <a href="javascript:void(0);" data-bs-toggle="modal" data-bs-target=".add-new" class="btn btn-success waves-effect waves-light"><i class="mdi mdi-plus me-2"></i> Kullanıcı Ekle</a>
+                    </div>
+                </div>
+
+                <div id="table-contacts-list"></div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade add-new" tabindex="-1" role="dialog" aria-labelledby="addUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addUserModalLabel">Kullanıcı Ekle</h5>                
+                    <span aria-hidden="true"></span>
+            </div>
+            <div class="modal-body">
+                <form asp-action = "CreateUser" asp-controller="Home" id="addUserForm" method="post">
+                    <div class="form-group">
+                        <label for="firstName">İsim</label>
+                        <input type ="name" asp-for="Name"  class="form-control" id="firstName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="lastName">Soyisim</label>
+                        <input type="surname" asp-for="Surname" class="form-control" id="lastName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">E-posta</label>
+                        <input type="email" asp-for="Email" class="form-control" id="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Telefon</label>
+                        <input type ="text" asp-for="Phone" class="form-control"id="phone" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Sifre</label>
+                        <input type="password" asp-for="Password" class="form-control" id="password" required>
+                    </div>
+                   
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+                        <button type="submit" class="btn btn-primary">Kaydet</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<!-- end row -->
+@section scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            LoadUserGrid();
+            $('.gridjs-search-input').attr("placeholder", "Ara");
+        });
+
+        function LoadUserGrid() {
+            new gridjs.Grid({
+                language: {
+                    pagination: {
+                        previous: 'geri',
+                        next: 'ileri',
+                        showing: '\n',
+                        to: 'ile',
+                        of: 'ile',
+                        results: '@Html.Raw("Arası Sonuç Gösteriliyor")',
+                    }
+                },
+                columns: [
+                    { name: "", sort: { enabled: false }, formatter: () => gridjs.html('<i class="bx bx-user"></i>') },
+                    "İsim",
+                    "Soyisim",
+                    "E-posta",
+                    "Telefon",
+                    "ID", 
+                    {
+                        name: "Aktif/Pasif",
+                        formatter: (cell) => gridjs.html(`<input type="checkbox" ${cell ? 'checked' : ''} disabled/>`),
+                    },
+                    {
+                        name: 'İşlemler',
+                        formatter: (_, row) => gridjs.html(
+                            `<button class="btn btn-info btn-sm" onclick="editUser(${row.cells[5].data})">Güncelle</button>
+                                 <button class="btn btn-danger btn-sm" onclick="confirmAndDelete(${row.cells[5].data})">Sil</button>`
+                        )
+                    }
+                ],
+                pagination: { limit: 10 },
+                sort: true,
+                search: true,
+                server: {
+                    url: '/Home/_UserList',
+                    then: data => data.map(item => [
+                        , item.name
+                        , item.surname
+                        , item.email
+                        , item.phone
+                        , item.userId 
+                        , item.active
+                    ]),
+                    total: data => data.count
+                }
+
+            }).render(document.getElementById("table-contacts-list"));
+        }
+
+        
+         
+        @if (TempData["ShowAlert"] != null && (bool)TempData["ShowAlert"])
+        {
+            <text>
+                $(document).ready(function () {
+                    Swal.fire(
+                        'Success!',
+                        'Kullanıcı Başarıyla Eklendi!',
+                        'success'
+                    );
+                });
+            </text>
+        }
+    
+
+        function editUser(userId) {
+            Swal.fire({
+                title: 'Kullanıcıyı güncellemek istediğinizden emin misiniz?',
+                text: "Bu işlem geri alınamaz!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Evet, güncelle',
+                cancelButtonText: 'İptal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = '/Home/EditUser?userId=' + userId;
+                }
+            });
+        }
+
+
+        @if (TempData["ShowAlert"] != null && (bool)TempData["ShowAlert"])
+        {
+            <text>
+                $(document).ready(function () {
+                    Swal.fire(
+                        'Başarılı!',
+                        'Kullanıcı Başarıyla Güncellendi!',
+                        'success'
+                    );
+                });
+            </text>
+        }
+
+        function addUser() {
+            var formData = {
+                name: $('#firstName').val(),
+                surname: $('#lastName').val(),
+                email: $('#email').val(),
+                phone: $('#phone').val(),
+                password: $('#password').val()
+            };
+
+            $.ajax({
+                url: '/Home/CreateUser', 
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(formData),
+                success: function (response) {
+                    if (response.success) {
+                        
+                        Swal.fire(
+                            'Başarılı!',
+                            'Kullanıcı başarıyla eklendi.',
+                            'success'
+                        ).then(function () {
+
+                            window.location.href = '/Home/EditUser?userId=' + response.userId;
+                        });
+                    } else {
+                        Swal.fire(
+                            'Hata!',
+                            'Kullanıcı eklenemedi: ' + response.message,
+                            'error'
+                        );
+                    }
+                },
+                error: function (xhr, status, error) {
+                    Swal.fire(
+                        'Hata!',
+                        'Kullanıcı eklenemedi: ' + xhr.responseText,
+                        'error'
+                    );
+                }
+            });
+        }
+
+
+
+
+
+        function confirmAndDelete(userId) {
+            Swal.fire({
+                title: 'Kullanıcıyı silmek istediğinize emin misiniz?',
+                text: "Bu işlem geri alınamaz!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Evet, sil!',
+                cancelButtonText: 'İptal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '/Home/DeleteUser',
+                        type: 'POST',
+                        data: { userId: userId },
+                        success: function (response) {
+                            if (response.success) {
+                                Swal.fire(
+                                    'Silindi!',
+                                    response.message,
+                                    'success'
+                                ).then(function () {
+                                    location.reload();
+                                });
+                            } else {
+                                Swal.fire(
+                                    'Hata!',
+                                    response.message,
+                                    'error'
+                                );
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            Swal.fire(
+                                'Hata!',
+                                'Kullanıcı silinemedi: ' + xhr.responseText,
+                                'error'
+                            );
+                        }
+                    });
+                }
+            });
+        }
+
+        
+
+
+        
+
+
+
+    </script>
+
+}

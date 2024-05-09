@@ -1,0 +1,67 @@
+﻿@model UserControlWeb.Models.Users
+
+
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Kullanıcı Düzenle</h5>
+                    <form asp-action = "EditUser" asp-controller="Home" id="editUserForm" method="post">
+                        <input hidden type="hidden" asp-for="UserId" />
+
+                        <div class="mb-3">
+                            <label for="name" class="form-label">İsim:</label>
+                            <input type="text" asp-for="Name" id="name"   class="form-control" placeholder="İsim" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="surname" class="form-label">Soyisim:</label>
+                            <input type="text" asp-for="Surname" id="surname"  class="form-control" placeholder="Soyisim" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">E-posta:</label>
+                            <input type="email" id="email"  asp-for="Email" class="form-control" placeholder="E-posta" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="phone" class="form-label">Telefon:</label>
+                            <input type="text" id="phone"  asp-for="Phone" class="form-control" placeholder="Telefon" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Şifre:</label>
+                            <input type="text" id="password" asp-for="Password" class="form-control" placeholder="Şifre" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Kullanıcıyı Düzenle</button>
+                    </form>
+                    <div id="editMessage" class="mt-3"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+@section scripts {
+
+    <script>
+        
+        @if (TempData["ShowAlert"] != null && (bool)TempData["ShowAlert"])
+        {
+            <text>
+                $(document).ready(function () {
+                    alert("User updated successfully!");
+                });
+            </text>
+        }
+    </script>
+
+
+
+}
+
+
+
+
